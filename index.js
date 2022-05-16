@@ -71,6 +71,14 @@ async function run() {
                 service.slots = available;
             })
             res.send(services);
+        });
+
+        //booking by user email api
+        app.get('/booking', async (req, res) => {
+            const patient = req.query.patientEmail;
+            const query = {patient: patient}
+            const bookings = await bookingCollection.find(query).toArray();
+            res.send(bookings);
         })
 
          //post a new booking API
