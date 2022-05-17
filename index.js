@@ -29,6 +29,7 @@ async function run() {
         // console.log('db connected')
         const serviceCollection = client.db('doctors_portal').collection('treatment');
         const bookingCollection = client.db('doctors_portal').collection('bookings');
+        const userCollection = client.db('doctors_portal').collection('users');
         /**
          * API naming convention
          * app.get('/booking) // get all bookings or more than one or by filter
@@ -91,6 +92,25 @@ async function run() {
             }
             const result = await bookingCollection.insertOne(booking);
             return res.send({success: true, result})
+        });
+
+        //update a user API
+        app.put('/user/:email', async (req, res) => {
+            const email = req.params.email;
+            const user = req.body;
+            const filter = { email: email };
+            const options = { upsert: true };
+            const updateDoc = {
+                $set: user,
+            };
+            const result = await userCollection.updateOne(filter, updateDoc, options);
+            //generate and send token
+            const token = jwt.sign({
+                email: email
+            }, process.env.SECRET_KEY_TOKEN, {
+            expiresIn: '1h'
+            })
+            res.send({result, token});
         })
     }
     finally{
